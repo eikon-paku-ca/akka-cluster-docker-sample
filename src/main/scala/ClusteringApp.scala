@@ -1,15 +1,11 @@
 package com.mlh.clustering
 
 import akka.actor._
-import akka.cluster.Cluster
-import akka.cluster.ClusterEvent._
+import com.mlh.clustering.actor.TickActor
 
 object ClusteringApp extends App {
-   import com.mlh.clustering.ClusteringConfig._
-
-   implicit val system = ActorSystem(clusterName)
 
    val clusterListener = system.actorOf(Props[ClusterListener], name = "clusterListener")
-
+  system.actorOf(Props[TickActor], name = "tickActor")
   sys.addShutdownHook(system.shutdown())
 }
