@@ -1,15 +1,15 @@
 package com.mlh.clustering.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
-import akka.pattern.ask
 import akka.routing.FromConfig
 import com.mlh.clustering._
 import com.mlh.clustering.actor.CountActor.{Count, End, Start}
 
-import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{Duration, DurationInt}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+import akka.pattern.ask
 
 /**
   * Created by pek on 2017/10/20.
@@ -32,7 +32,9 @@ class RouterActor(private val clusterListener: ActorRef)
     //case msg :Any  => sender() ! routerPool.ask(msg, clusterListener).mapTo[Any]
     case Count(i)  => {
       log.info("===============RouterActor is Count. {}", i)
-      val f: Future[Int] = (routerPool ? (Count, clusterListener)).mapTo[Int]
+//      routerPool ! Count(i)
+//      sender() ! 1
+      val f: Future[Int] = (routerPool ? (Count(i), clusterListener)).mapTo[Int]
       Await.ready(f, Duration.Inf)
       f.value.get match {
         case Success(num) => sender() ! num
@@ -60,6 +62,11 @@ class CountActor
   override def preStart = self ! Start
   val countHashMap = scala.collection.mutable.HashMap.empty[Int, Int]
   def receive: Receive = {
+    case x => {
+      log.info(x.toString)
+//      log.info("-----------================= ", sender.path)
+      sender() ! 900
+    }
     case Start    => {
       log.info("CountActor is start. ")
       (1 to 10) foreach (
