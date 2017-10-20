@@ -16,9 +16,9 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
 
   override def preStart = self ! "tick"
 
-  system.scheduler.schedule(1 second, 1 second, self, "tick")
+  context.system.scheduler.schedule(1 second, 1 second, self, "tick")
 
-  implicit val timeout         = akka.util.Timeout(2.seconds)
+  implicit val timeout = akka.util.Timeout(100 milliseconds)
 
   val _id = id
 

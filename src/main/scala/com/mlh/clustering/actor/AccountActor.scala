@@ -1,7 +1,6 @@
 package com.mlh.clustering.actor
 
 import akka.actor.{Actor, ActorLogging, PoisonPill}
-import com.mlh.clustering._
 import com.mlh.clustering.actor.AccountActor.{End, Start}
 
 import scala.concurrent.duration.DurationInt
@@ -14,17 +13,17 @@ class AccountActor
   extends Actor
   with ActorLogging {
 
-  implicit val timeout = akka.util.Timeout(1.seconds)
+  implicit val timeout = akka.util.Timeout(100 milliseconds)
 
   override def preStart = self ! Start
 
   def receive: Receive = {
     case Start    => {
-      log.info("RouterActor is start. ")
-      (1 to 10) foreach (i => system.actorOf(EachAccountActor.props(i), name = s"$AccountActor.baseName$i"))
+      log.info("AccountActor is start. ")
+      (1 to 10) foreach (i => context.actorOf(EachAccountActor.props(i), name = s"$AccountActor.baseName$i"))
     }
     case End => {
-      log.info("RouterActor is end. ")
+      log.info("AccountActor is end. ")
       self ! PoisonPill
     }
   }
