@@ -46,8 +46,11 @@ libraryDependencies ++= Seq (
   ,"com.typesafe.akka" %% "akka-actor" % akka
   ,"com.typesafe.akka" %% "akka-slf4j" % akka
   ,"com.typesafe.akka" %% "akka-cluster" % akka
+  ,"com.typesafe.akka" %% "akka-cluster-tools" % "2.5.4"
+
   // -- json --
   ,"org.json4s" %% "json4s-jackson" % "3.2.10"
+
   // -- config --
   ,"com.typesafe" % "config" % "1.2.0"
 )
