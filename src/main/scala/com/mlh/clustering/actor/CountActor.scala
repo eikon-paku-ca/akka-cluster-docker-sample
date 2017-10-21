@@ -26,7 +26,7 @@ class CountActor
   def receive: Receive = {
     case "tick" =>
 
-      log.info("============HashMap==========", countHashMap)
+      log.info("============HashMap==========", countHashMap.toList.mkString(","))
       val s = self.path
       log.info(s.name)
       log.info(s.toString)
@@ -49,6 +49,7 @@ class CountActor
       self ! PoisonPill
     }
     case x => {
+      println("=============--------================%s" format x.toString)
       log.info("nothing...")
       //      log.info("-----------================= ", sender.path)
       sender() ! 900
