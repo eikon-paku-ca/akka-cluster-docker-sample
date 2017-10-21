@@ -36,8 +36,9 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
       log.info("tick is running..============================")
 
 //      self ! "start"
-//      system.actorSelection(CountActor.path) ? "TEST"
-      system.actorSelection(CountActor.path).ask(CountActor.Count(_id)).mapTo[Int].onComplete{
+//      system.actorSelection("user/routerActor/workerRouter") ! "user/routerActor/workerRouter"
+//      system.actorSelection("user/routerActor") ! CountActor.Count(_id)
+      system.actorSelection("user/routerActor").ask(CountActor.Count(_id)).mapTo[Int].onComplete{
 //      (system.actorSelection(CountActor.path) ? "TEST").mapTo[String].onComplete{
         case Success(count) => log.info("id : {} count : {}", _id, count)
         case Failure(ex) => log.error(ExceptionUtil.stackTraceString(ex))

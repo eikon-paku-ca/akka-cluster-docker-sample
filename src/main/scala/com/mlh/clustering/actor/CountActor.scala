@@ -1,9 +1,11 @@
 package com.mlh.clustering.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
+import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings}
 import akka.routing.FromConfig
 import com.mlh.clustering._
 import com.mlh.clustering.actor.CountActor.{Count, End, Start}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, DurationInt}
@@ -108,19 +110,15 @@ class RouterActor(private val clusterListener: ActorRef)
     with ActorLogging {
 
   implicit val timeout = akka.util.Timeout(100 milliseconds)
+  val singletonProps = ClusterSingletonManager.props(
+    singletonProps = Props[CountActor],
+    terminationMessage = PoisonPill,
+    settings = ClusterSingletonManagerSettings(system)
+  )
   private lazy val routerPool =
-    system.actorOf(FromConfig.props(Props[CountActor]), name = "workerRouter")
+    system.actorOf(FromConfig.props(singletonProps), name = "workerRouter")
 
   def receive: Receive = {
-    case "TEST" => {
-      log.info("TEST is RUNNING......................................................................")
-      sender() ! "||||||||||||||||||||||||||||||||||||||||"
-    }
-    case Start    => {
-      log.info("RouterActor is start. ")
-      routerPool.tell(Start, clusterListener)
-    }
-
     //case msg :Any  => sender() ! routerPool.ask(msg, clusterListener).mapTo[Any]
     case x:Count  => {
       log.info("===============RouterActor is Count. {}", x.id)
@@ -133,6 +131,25 @@ class RouterActor(private val clusterListener: ActorRef)
         case Failure(t) => log.error("=============================================Fail: " + t.getMessage())
       }
     }
+    case x => {
+      log.info("===============RouteCountActor Called...")
+      println("===============Message==============" + x.toString)
+      val f: Future[Any] = routerPool.ask(Count(1))(timeout, clusterListener).mapTo[Any]
+      Await.ready(f, Duration.Inf)
+      f.value.get match {
+        case Success(any) => sender() ! any
+        case Failure(t) => log.error("=============================================Fail: " + t.getMessage())
+      }
+    }
+    case "TEST" => {
+      log.info("TEST is RUNNING......................................................................")
+      sender() ! "||||||||||||||||||||||||||||||||||||||||"
+    }
+    case Start    => {
+      log.info("RouterActor is start. ")
+      routerPool.tell(Start, clusterListener)
+    }
+
     case End => {
       log.info("RouterActor is end. ")
       routerPool ! End
