@@ -2,7 +2,7 @@ package com.mlh.clustering.actor
 
 import akka.actor.{Actor, ActorLogging, PoisonPill}
 import com.mlh.clustering.actor.AccountActor.{End, Start}
-
+import com.mlh.clustering._
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
@@ -20,7 +20,10 @@ class AccountActor
   def receive: Receive = {
     case Start    => {
       log.info("AccountActor is start. ")
-      (1 to 10) foreach (i => context.actorOf(EachAccountActor.props(i), name = s"$AccountActor.baseName$i"))
+//      (1 to 10) foreach { i =>
+//        Thread.sleep(5000)
+//        system.actorOf(EachAccountActor.props(i), name = s"$AccountActor.baseName$i")
+//      }
     }
     case End => {
       log.info("AccountActor is end. ")
@@ -32,6 +35,6 @@ class AccountActor
 object AccountActor {
   case object Start
   case object End
-  val baseName = "EachAccountActor>>>>>>>>>>>>>>>>>>>>>"
+  val baseName = "EachAccountActor00000000000000000000000000000000000000000"
   val name = "accountActor"
 }
