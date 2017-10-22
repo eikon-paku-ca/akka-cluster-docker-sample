@@ -19,6 +19,7 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
   implicit val timeout = akka.util.Timeout(100 milliseconds)
 
   val _id = id
+  var countLimit = _id * 10000
 
   override def receive: Receive = {
     case "start" =>
@@ -31,18 +32,18 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
     case ActorIdentity(_, Some(ref)) =>
       log.info(ref.toString())
       self ! ref.path
-
+    case "ping" => log.info("account id {} get ping" , _id)
     case "tick" => {
-      log.info("tick is running..============================")
-
+      countLimit -= 1
+      log.info("tick is running..============================ id : {} count : {}" , _id, countLimit)
 //      self ! "start"
 //      system.actorSelection("user/routerActor/workerRouter") ! "user/routerActor/workerRouter"
 //      system.actorSelection("user/routerActor") ! CountActor.Count(_id)
-      system.actorSelection("user/routerActor").ask(CountActor.Count(_id)).mapTo[Int].onComplete{
-//      (system.actorSelection(CountActor.path) ? "TEST").mapTo[String].onComplete{
-        case Success(count) => log.info("id : {} count : {}", _id, count)
-        case Failure(ex) => log.error(ExceptionUtil.stackTraceString(ex))
-      }
+//      system.actorSelection("user/routerActor").ask(CountActor.Count(_id)).mapTo[Int].onComplete{
+////      (system.actorSelection(CountActor.path) ? "TEST").mapTo[String].onComplete{
+//        case Success(count) => log.info("id : {} count : {}", _id, count)
+//        case Failure(ex) => log.error(ExceptionUtil.stackTraceString(ex))
+//      }
 
 
     }

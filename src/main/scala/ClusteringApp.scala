@@ -12,18 +12,18 @@ object ClusteringApp extends App {
    val clusterListener = system.actorOf(Props[ClusterListener], name = "clusterListener")
   Cluster(system).subscribe(clusterListener, classOf[ClusterDomainEvent])
   // router起動
-  system.actorOf(Props(classOf[RouterActor], clusterListener), name = RouterActor.name)
+//  system.actorOf(Props(classOf[RouterActor], clusterListener), name = RouterActor.name)
 //  system.actorOf(FromConfig.props(Props[CountActor]), name = "workerRouter")
 
 //#   AccountActorはsingleton
 //  Cluster SingletonでAccountListActorを起動する
-  val singletonProps = ClusterSingletonManager.props(
-    singletonProps = Props[AccountActor],
-    terminationMessage = PoisonPill,
-    settings = ClusterSingletonManagerSettings(system)
-  )
-  system.actorOf(singletonProps, AccountActor.name)
-
+//  val singletonProps = ClusterSingletonManager.props(
+//    singletonProps = Props[AccountActor],
+//    terminationMessage = PoisonPill,
+//    settings = ClusterSingletonManagerSettings(system)
+//  )
+//  system.actorOf(singletonProps, AccountActor.name)
+  system.actorOf(Props[AccountActor], name = AccountActor.name)
 //  //#   CountActorはsingleton
 //  val singletonProps1 = ClusterSingletonManager.props(
 //    singletonProps = Props[CountActor],
@@ -33,10 +33,10 @@ object ClusteringApp extends App {
 //  val countActor = system.actorOf(singletonProps1, CountActor.name)
 
   // アカウントごとのActorはルートパスから起動する。子Actorにしてしまうとシングルトーンから実行されるとき１ノードでしか動かない
-  (1 to 10) foreach { i =>
-    Thread.sleep(5000)
-    system.actorOf(EachAccountActor.props(i), name = "%s%d" format (AccountActor.baseName, i))
-  }
+//  (1 to 10) foreach { i =>
+//    Thread.sleep(5000)
+//    system.actorOf(EachAccountActor.props(i), name = "%s%d" format (AccountActor.baseName, i))
+//  }
 
   sys.addShutdownHook(system.terminate())
 }
