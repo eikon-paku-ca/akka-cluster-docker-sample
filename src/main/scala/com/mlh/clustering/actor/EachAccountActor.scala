@@ -1,10 +1,10 @@
 package com.mlh.clustering.actor
 
 import akka.actor.{Actor, ActorIdentity, ActorLogging, ActorPath, Identify, PoisonPill, Props}
-import akka.pattern.ask
-import com.mlh.clustering._
+import com.mlh.clustering.ExceptionUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
@@ -14,13 +14,17 @@ import scala.util.{Failure, Success}
   */
 class EachAccountActor(id: Int) extends Actor with ActorLogging {
 
-  context.system.scheduler.schedule(5 second, 5 second, self, "tick")
-  context.system.scheduler.schedule(5 second, 10 second, self, "start")
-  implicit val timeout = akka.util.Timeout(100 milliseconds)
+  val actor = Some(context.system.scheduler.schedule(20 second, 20 second, self, "tick"))
+
+  override def postStop() = {
+    log.info("スケジューラを停止しますすすすすすすすすすすす！！！！")
+    actor.foreach(_.cancel())
+  }
+
 
   val _id = id
   var countLimit = _id * 10000
-
+  implicit val timeout = akka.util.Timeout(1.seconds)
   override def receive: Receive = {
     case "start" =>
       log.info("Current Actors in system:")
@@ -32,7 +36,15 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
     case ActorIdentity(_, Some(ref)) =>
       log.info(ref.toString())
       self ! ref.path
-    case "ping" => log.info("account id {} get ping" , _id)
+    case "ping" => {
+      log.info("account id {} get ping" , _id)
+      f.onComplete {
+        case Success(x) => sender() ! x
+        case Failure(ex) =>
+          log.error(ExceptionUtil.stackTraceString(ex))
+          throw ex
+      }
+    }
     case "tick" => {
       countLimit -= 1
       log.info("tick is running..============================ id : {} count : {}" , _id, countLimit)
@@ -53,6 +65,10 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
       self ! PoisonPill
     }
   }
+    val f: Future[String] = Future {
+      Thread.sleep(1000)
+      "PONG!"
+    }
 
 }
 

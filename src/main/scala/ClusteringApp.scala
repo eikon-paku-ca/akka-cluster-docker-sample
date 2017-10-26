@@ -1,11 +1,9 @@
 package com.mlh.clustering
 
-import akka.actor.{PoisonPill, Props}
+import akka.actor.Props
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.ClusterDomainEvent
-import com.mlh.clustering.actor.{AccountActor, CountActor, EachAccountActor, RouterActor}
-import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings}
-import akka.routing.FromConfig
+import com.mlh.clustering.actor.{ActorA, ActorB}
 
 object ClusteringApp extends App {
 
@@ -23,7 +21,7 @@ object ClusteringApp extends App {
 //    settings = ClusterSingletonManagerSettings(system)
 //  )
 //  system.actorOf(singletonProps, AccountActor.name)
-  system.actorOf(Props[AccountActor], name = AccountActor.name)
+//  system.actorOf(Props[AccountActor], name = AccountActor.name)
 //  //#   CountActorはsingleton
 //  val singletonProps1 = ClusterSingletonManager.props(
 //    singletonProps = Props[CountActor],
@@ -38,5 +36,14 @@ object ClusteringApp extends App {
 //    system.actorOf(EachAccountActor.props(i), name = "%s%d" format (AccountActor.baseName, i))
 //  }
 
+
+  // Ask time out test
+  system.actorOf(Props[ActorA], name = "actorA")
+  (1 to 10).foreach{ m =>
+    system.actorOf(Props[ActorB], name = "actorB_%d" format m)
+  }
+//  system.actorOf(Props[ActorStart], name = "actorStart")
+
+  // shutdown
   sys.addShutdownHook(system.terminate())
 }
