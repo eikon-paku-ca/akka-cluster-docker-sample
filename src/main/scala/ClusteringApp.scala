@@ -1,8 +1,9 @@
 package com.mlh.clustering
 
-import akka.actor.Props
+import akka.actor.{PoisonPill, Props}
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.ClusterDomainEvent
+import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings}
 import com.mlh.clustering.actor.DelayMessageConsumerActor
 
 object ClusteringApp extends App {
@@ -13,17 +14,17 @@ object ClusteringApp extends App {
   val isRouter = Some(System.getenv("DELAY_ACTOR")).getOrElse("false")
 
   // router起動
-  if (isRouter == "is_router")
-    system.actorOf(Props(classOf[DelayMessageConsumerActor], clusterListener), name = DelayMessageConsumerActor.name)
+//  if (isRouter == "is_router")
+//    system.actorOf(Props(classOf[DelayMessageConsumerActor], clusterListener), name = DelayMessageConsumerActor.name)
 
 //#   AccountActorはsingleton
 //  Cluster SingletonでAccountListActorを起動する
-//  val singletonProps = ClusterSingletonManager.props(
-//    singletonProps = Props[AccountActor],
-//    terminationMessage = PoisonPill,
-//    settings = ClusterSingletonManagerSettings(system)
-//  )
-//  system.actorOf(singletonProps, AccountActor.name)
+  val singletonProps = ClusterSingletonManager.props(
+    singletonProps = Props(classOf[DelayMessageConsumerActor], clusterListener),
+    terminationMessage = PoisonPill,
+    settings = ClusterSingletonManagerSettings(system)
+  )
+  system.actorOf(singletonProps, DelayMessageConsumerActor.name)
 //  system.actorOf(Props[AccountActor], name = AccountActor.name)
 //  //#   CountActorはsingleton
 //  val singletonProps1 = ClusterSingletonManager.props(
