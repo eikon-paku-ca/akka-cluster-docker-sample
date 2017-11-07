@@ -1,41 +1,41 @@
 package com.mlh.clustering.actor
 
-import akka.actor.{Actor, ActorLogging, PoisonPill}
-import com.mlh.clustering._
-import com.mlh.clustering.actor.AccountActor.{End, Start}
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
+import akka.actor.{Actor, ActorLogging}
 import akka.pattern.ask
+import akka.routing.FromConfig
+import com.mlh.clustering._
+import com.mlh.clustering.actor.AccountListActor.{End, Start}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.language.postfixOps
 
 /**
   * Created by pek on 2017/10/20.
   */
-class AccountActor
+class AccountListActor
   extends Actor
   with ActorLogging {
 
   implicit val timeout = akka.util.Timeout(1000 milliseconds)
-  context.system.scheduler.schedule(5 second, 5 second, self, "ping")
+//  context.system.scheduler.schedule(5 second, 5 second, self, "ping")
+
   override def preStart = self ! Start
 
   def receive: Receive = {
     case Start    => {
       log.info("AccountActor is start. ")
       (1 to 10) foreach { i =>
-        Thread.sleep(5000)
-        context.actorOf(EachAccountActor.props(i), name = "%s%d" format(AccountActor.baseName, i))
+        context.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
       }
     }
     case "ping" =>
       val result = getPing()
       log.info("result : {}", result)
+
     case End => {
       log.info("AccountActor is end. ")
-      self ! PoisonPill
+      context stop self
     }
   }
   def getPing(): Future[String] = {
@@ -43,9 +43,10 @@ class AccountActor
   }
 }
 
-object AccountActor {
+object AccountListActor {
   case object Start
   case object End
-  val baseName = "eachAccountActor"
-  val name = "accountActor"
+  val name = "accountList"
+  val path = s"user/$name"
 }
+

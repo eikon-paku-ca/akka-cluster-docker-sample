@@ -1,7 +1,8 @@
 package com.mlh.clustering.actor
 
-import akka.actor.{Actor, ActorIdentity, ActorLogging, ActorPath, Identify, PoisonPill, Props}
+import akka.actor.{Actor, ActorIdentity, ActorLogging, ActorPath, ActorSelection, Identify, PoisonPill, Props}
 import com.mlh.clustering.ExceptionUtil
+import com.mlh.clustering.system
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -12,7 +13,7 @@ import scala.util.{Failure, Success}
 /**
   * Created by pek on 2017/10/20.
   */
-class EachAccountActor(id: Int) extends Actor with ActorLogging {
+class CallApiActor(id: Int) extends Actor with ActorLogging {
 
   val actor = Some(context.system.scheduler.schedule(20 second, 20 second, self, "tick"))
 
@@ -72,6 +73,22 @@ class EachAccountActor(id: Int) extends Actor with ActorLogging {
 
 }
 
-object EachAccountActor {
-  def props(id: Int): Props = Props(new EachAccountActor(id))
+object CallApiActor {
+  def props(id: Int): Props = Props(new CallApiActor(id))
+}
+object CallApiHelper {
+  def props(id: Int): Props = Props(new CallApiActor(id))
+  private lazy val CALL_API_ACTOR_NAME_PREFIX = "apiRouter_%d"
+
+  def generateActorName(accountId: Int): String = {
+    CALL_API_ACTOR_NAME_PREFIX format accountId
+  }
+
+  def getActorPath(accountId: Int): String = {
+    "%s/%s" format (AccountListActor.path, generateActorName(accountId))
+  }
+
+  def getActorSelection(accountId: Int): ActorSelection = {
+    system.actorSelection(CallApiHelper.getActorPath(accountId))
+  }
 }

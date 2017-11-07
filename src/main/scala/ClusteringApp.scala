@@ -3,15 +3,14 @@ package com.mlh.clustering
 import akka.actor.Props
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.ClusterDomainEvent
-import com.mlh.clustering.actor.{ActorA, ActorB}
+import com.mlh.clustering.actor.DelayMessageConsumerActor
 
 object ClusteringApp extends App {
 
    val clusterListener = system.actorOf(Props[ClusterListener], name = "clusterListener")
   Cluster(system).subscribe(clusterListener, classOf[ClusterDomainEvent])
   // router起動
-//  system.actorOf(Props(classOf[RouterActor], clusterListener), name = RouterActor.name)
-//  system.actorOf(FromConfig.props(Props[CountActor]), name = "workerRouter")
+  system.actorOf(Props(classOf[DelayMessageConsumerActor], clusterListener), name = DelayMessageConsumerActor.name)
 
 //#   AccountActorはsingleton
 //  Cluster SingletonでAccountListActorを起動する
@@ -38,10 +37,10 @@ object ClusteringApp extends App {
 
 
   // Ask time out test
-  system.actorOf(Props[ActorA], name = "actorA")
-  (1 to 10).foreach{ m =>
-    system.actorOf(Props[ActorB], name = "actorB_%d" format m)
-  }
+//  system.actorOf(Props[ActorA], name = "actorA")
+//  (1 to 10).foreach{ m =>
+//    system.actorOf(Props[ActorB], name = "actorB_%d" format m)
+//  }
 //  system.actorOf(Props[ActorStart], name = "actorStart")
 
   // shutdown
