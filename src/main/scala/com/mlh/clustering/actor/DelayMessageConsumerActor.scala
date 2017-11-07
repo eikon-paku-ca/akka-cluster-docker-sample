@@ -20,6 +20,8 @@ class DelayMessageConsumerActor(private val clusterListener: ActorRef)
   private lazy val workerRouterPool =
     context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
 
+
+  system.scheduler.schedule(10 second, 10 second, self, "TICK")
   override def preStart(): Unit = self ! (1 to 25).toList
   def receive: Receive = {
     case countList: List[Int] =>
@@ -32,11 +34,7 @@ class DelayMessageConsumerActor(private val clusterListener: ActorRef)
 //      system.scheduler.schedule(10 second, 10 second, self, "TICK")
 
     case "TICK" =>
-      workerRouterPool.tell(1000, clusterListener)
-      Thread.sleep(1000)
-      workerRouterPool.tell(2000, clusterListener)
-      Thread.sleep(1000)
-      workerRouterPool.tell(3000, clusterListener)
+      log.info("TACK")
   }
 
 }
