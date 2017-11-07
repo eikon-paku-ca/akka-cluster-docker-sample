@@ -5,6 +5,7 @@ services:
     ports:
       - '1600:1600'
     environment:
+      DELAY_ACTOR: is_router
       CLUSTER_PORT: 1600
       CLUSTER_IP: seed
       SEED_PORT_1600_TCP_ADDR: seed

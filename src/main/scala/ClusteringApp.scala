@@ -9,8 +9,12 @@ object ClusteringApp extends App {
 
    val clusterListener = system.actorOf(Props[ClusterListener], name = "clusterListener")
   Cluster(system).subscribe(clusterListener, classOf[ClusterDomainEvent])
+
+  val isRouter = Some(System.getenv("DELAY_ACTOR")).getOrElse("false")
+
   // router起動
-  system.actorOf(Props(classOf[DelayMessageConsumerActor], clusterListener), name = DelayMessageConsumerActor.name)
+  if (isRouter == "is_router")
+    system.actorOf(Props(classOf[DelayMessageConsumerActor], clusterListener), name = DelayMessageConsumerActor.name)
 
 //#   AccountActorはsingleton
 //  Cluster SingletonでAccountListActorを起動する

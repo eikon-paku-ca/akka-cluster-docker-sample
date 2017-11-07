@@ -20,11 +20,23 @@ class DelayMessageConsumerActor(private val clusterListener: ActorRef)
   private lazy val workerRouterPool =
     context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
 
-  override def preStart(): Unit = self ! (1 to 10).toList
-
+  override def preStart(): Unit = self ! (1 to 25).toList
   def receive: Receive = {
     case countList: List[Int] =>
-      countList foreach (cnt => workerRouterPool.tell(cnt, clusterListener))
+//      Thread.sleep(30000)
+      countList foreach {
+        cnt =>
+          Thread.sleep(1000)
+          workerRouterPool.tell(cnt + "_" + 1, clusterListener)
+      }
+//      system.scheduler.schedule(10 second, 10 second, self, "TICK")
+
+    case "TICK" =>
+      workerRouterPool.tell(1000, clusterListener)
+      Thread.sleep(1000)
+      workerRouterPool.tell(2000, clusterListener)
+      Thread.sleep(1000)
+      workerRouterPool.tell(3000, clusterListener)
   }
 
 }
@@ -42,13 +54,15 @@ class DelayMessageConsumerWorkerActor
   extends Actor
     with ActorLogging {
 
+  override def preStart(): Unit = log.info("workerRouter run.")
+
   def receive: Receive = {
-    case cnt:Int =>
-      run(cnt)
+    case cnt:String =>
+      send(cnt)
     case _ =>  log.info("Unsupported message.")
   }
 
-  def run(cnt: Int) = {
+  def send(cnt: String) = {
     log.info("cnt = {}", cnt)
     scheduleDelayConsumer(cnt)
   }
@@ -56,9 +70,10 @@ class DelayMessageConsumerWorkerActor
     Thread.sleep(100)
     "Success"
   }
-  def scheduleDelayConsumer(cnt: Int): Cancellable = {
+  def scheduleDelayConsumer(cnt: String): Cancellable = {
     system.scheduler.scheduleOnce(10 second) {
-      self ! cnt + 1
+      val sp = cnt.split("_")
+      self ! sp(0) + "_" + (sp(1).toInt + 1)
     }
   }
 

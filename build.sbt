@@ -1,3 +1,5 @@
+
+
 name := "clustering"
 
 organization := "com.mlh"
@@ -32,7 +34,7 @@ scalacOptions ++= Seq(
   ,"-language:postfixOps"
 )
 
-val akka = "2.3.7"
+val akka = "2.5.4"
 
 /* dependencies */
 libraryDependencies ++= Seq (
@@ -41,6 +43,7 @@ libraryDependencies ++= Seq (
   , "org.scalatest" % "scalatest_2.10" % "2.1.0" % "test"
   // -- Logging --
   ,"ch.qos.logback" % "logback-classic" % "1.1.1"
+  ,"com.typesafe.scala-logging" %% "scala-logging"        % "3.5.0"
   // -- Akka --
   ,"com.typesafe.akka" %% "akka-testkit" % akka % "test"
   ,"com.typesafe.akka" %% "akka-actor" % akka
@@ -53,7 +56,9 @@ libraryDependencies ++= Seq (
 
   // -- config --
   ,"com.typesafe" % "config" % "1.2.0"
+
 )
+
 
 maintainer := "Michael Hamrah <m@hamrah.com>"
 
