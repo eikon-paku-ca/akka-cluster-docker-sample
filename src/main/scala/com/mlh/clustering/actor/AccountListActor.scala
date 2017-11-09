@@ -26,11 +26,15 @@ class AccountListActor(private val clusterListener: ActorRef)
 
       // CallApiActor起動
       idList foreach { i =>
-//        context.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
+        context.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
 //        context.actorOf(CallApiActor.props(i), name = CallApiHelper.generateActorName(i))
       }
 
 
+      val isRouter = Some(System.getenv("is_leader")).getOrElse("false")
+      if (isRouter == "is_router") {
+
+      }
       // DelayWorkerRouterActor起動Singleton
 //      val singletonProps = ClusterSingletonManager.props(
 //        singletonProps = FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])),
@@ -38,10 +42,7 @@ class AccountListActor(private val clusterListener: ActorRef)
 //        settings = ClusterSingletonManagerSettings(system)
 //      )
 //      val workerRouter = context.actorOf(singletonProps, DelayMessageConsumerWorkerActor.name)
-
-      // workerRouter起動
       val workerRouter = context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
-
       Thread.sleep(4000)
       idList foreach { i =>
         // 初期メッセージ

@@ -1,20 +1,18 @@
 package com.mlh.clustering
 
-import akka.actor.{PoisonPill, Props}
+import akka.actor.Props
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.ClusterDomainEvent
-import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings}
-import akka.routing.FromConfig
-import com.mlh.clustering.actor.{AccountListActor, CallApiActor, CallApiHelper}
+import com.mlh.clustering.actor.AccountListActor
 
 object ClusteringApp extends App {
 
    val clusterListener = system.actorOf(Props[ClusterListener], name = "clusterListener")
 
   Cluster(system).subscribe(clusterListener, classOf[ClusterDomainEvent])
-  (1 to 6) foreach { i =>
-    system.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
-  }
+//  (1 to 6) foreach { i =>
+//    system.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
+//  }
 
 //  val isRouter = Some(System.getenv("is_leader")).getOrElse("false")
 
@@ -31,13 +29,13 @@ object ClusteringApp extends App {
 //  )
 //  system.actorOf(singletonProps, DelayMessageConsumerActor.name)
 //
-  val singletonProps_accountList = ClusterSingletonManager.props(
-    singletonProps = Props(classOf[AccountListActor], clusterListener),
-    terminationMessage = PoisonPill,
-    settings = ClusterSingletonManagerSettings(system)
-  )
-  system.actorOf(singletonProps_accountList, AccountListActor.name)
-//  system.actorOf(Props(classOf[AccountListActor], clusterListener), name = AccountListActor.name)
+//  val singletonProps_accountList = ClusterSingletonManager.props(
+//    singletonProps = Props(classOf[AccountListActor], clusterListener),
+//    terminationMessage = PoisonPill,
+//    settings = ClusterSingletonManagerSettings(system)
+//  )
+//  system.actorOf(singletonProps_accountList, AccountListActor.name)
+    system.actorOf(Props(classOf[AccountListActor], clusterListener), name = AccountListActor.name)
   // アカウントごとのActorはルートパスから起動する。子Actorにしてしまうとシングルトーンから実行されるとき１ノードでしか動かない
 //  (1 to 10) foreach { i =>
 //    Thread.sleep(5000)

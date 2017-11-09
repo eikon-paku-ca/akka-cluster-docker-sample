@@ -47,12 +47,12 @@ object CallApiHelper {
   }
 
   def getActorPath(accountId: Int): String = {
-    "%s/singleton/%s" format (AccountListActor.path, generateActorName(accountId))
+    "%s/%s" format (AccountListActor.path, generateActorName(accountId))
 //    "user/%s" format generateActorName(accountId)
   }
 
   def getActorSelection(accountId: Int): ActorSelection = {
-//    system.actorSelection(CallApiHelper.getActorPath(accountId))
-    system.actorSelection(s"user/%s" format generateActorName(accountId))
+    system.actorSelection(CallApiHelper.getActorPath(accountId))
+//    system.actorSelection(s"user/%s" format generateActorName(accountId))
   }
 }
