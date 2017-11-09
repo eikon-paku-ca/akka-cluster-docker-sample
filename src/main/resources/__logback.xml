@@ -1,0 +1,22 @@
+<configuration>
+
+    <appender name="app" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/app/app.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d %-5level [%thread] %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="jp.co.epaku" level="debug" additivity="false">
+        <appender-ref ref="app" />
+    </logger>
+
+    <logger name="akka" level="info" additivity="false">
+        <appender-ref ref="app" />
+    </logger>
+
+    <root level="warn">
+        <appender-ref ref="app"/>
+    </root>
+
+</configuration>

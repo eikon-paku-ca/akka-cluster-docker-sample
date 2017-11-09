@@ -1,51 +1,62 @@
 package com.mlh.clustering.actor
 
-import akka.actor.{Actor, ActorLogging}
-import akka.pattern.ask
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.routing.FromConfig
-import com.mlh.clustering._
-import com.mlh.clustering.actor.AccountListActor.{End, Start}
+import com.mlh.clustering.actor.ActorHelper._
 
-import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 /**
   * Created by pek on 2017/10/20.
   */
-class AccountListActor
+class AccountListActor(private val clusterListener: ActorRef)
   extends Actor
   with ActorLogging {
 
   implicit val timeout = akka.util.Timeout(1000 milliseconds)
 //  context.system.scheduler.schedule(5 second, 5 second, self, "ping")
 
-  override def preStart = self ! Start
+  override def preStart = self ! START
 
+  val idList = (1 to 6).toList
   def receive: Receive = {
-    case Start    => {
+    case START    => {
       log.info("AccountActor is start. ")
-      (1 to 10) foreach { i =>
-        context.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
+
+      // CallApiActor起動
+      idList foreach { i =>
+//        context.actorOf(FromConfig.props(CallApiActor.props(i)), name = CallApiHelper.generateActorName(i))
+//        context.actorOf(CallApiActor.props(i), name = CallApiHelper.generateActorName(i))
+      }
+
+
+      // DelayWorkerRouterActor起動Singleton
+//      val singletonProps = ClusterSingletonManager.props(
+//        singletonProps = FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])),
+//        terminationMessage = PoisonPill,
+//        settings = ClusterSingletonManagerSettings(system)
+//      )
+//      val workerRouter = context.actorOf(singletonProps, DelayMessageConsumerWorkerActor.name)
+
+      // workerRouter起動
+      val workerRouter = context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
+
+      Thread.sleep(4000)
+      idList foreach { i =>
+        // 初期メッセージ
+        Thread.sleep(1000)
+        workerRouter.tell(i + "_" + 1,  clusterListener)
       }
     }
-    case "ping" =>
-      val result = getPing()
-      log.info("result : {}", result)
-
-    case End => {
+    case STOP => {
       log.info("AccountActor is end. ")
       context stop self
     }
   }
-  def getPing(): Future[String] = {
-    (system.actorSelection("user/accountActor/eachAccountActor1") ? "ping").mapTo[String]
-  }
 }
 
 object AccountListActor {
-  case object Start
-  case object End
   val name = "accountList"
   val path = s"user/$name"
 }
