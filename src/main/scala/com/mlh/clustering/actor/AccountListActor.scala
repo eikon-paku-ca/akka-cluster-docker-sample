@@ -1,8 +1,10 @@
 package com.mlh.clustering.actor
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
+import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings}
 import akka.routing.FromConfig
 import com.mlh.clustering.actor.ActorHelper._
+import com.mlh.clustering.system
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
@@ -36,13 +38,13 @@ class AccountListActor(private val clusterListener: ActorRef)
 
       }
       // DelayWorkerRouterActor起動Singleton
-//      val singletonProps = ClusterSingletonManager.props(
-//        singletonProps = FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])),
-//        terminationMessage = PoisonPill,
-//        settings = ClusterSingletonManagerSettings(system)
-//      )
-//      val workerRouter = context.actorOf(singletonProps, DelayMessageConsumerWorkerActor.name)
-      val workerRouter = context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
+      val singletonProps = ClusterSingletonManager.props(
+        singletonProps = FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])),
+        terminationMessage = PoisonPill,
+        settings = ClusterSingletonManagerSettings(system)
+      )
+      val workerRouter = context.actorOf(singletonProps, DelayMessageConsumerWorkerActor.name)
+//      val workerRouter = context.actorOf(FromConfig.props(Props(classOf[DelayMessageConsumerWorkerActor])), name = DelayMessageConsumerWorkerActor.name)
       Thread.sleep(4000)
       idList foreach { i =>
         // 初期メッセージ
