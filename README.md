@@ -12,3 +12,4 @@ To run the cluster, run `docker-compose up`. This will create 3 nodes, a seed an
 While running, try opening a new terminal and (from the same directory) try things like `docker-compose down seed` and watch the cluster nodes respond.
 ## test
 ## test
+## test
