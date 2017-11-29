@@ -25,7 +25,7 @@ class CallApiActor(id: Int) extends Actor with ActorLogging {
 
   private def run(): Receive = {
     case m: String => {
-      log.info("CallApiActor : {}", m)
+      log.info("CallApiActor : {} {}", m, self.path.toStringWithoutAddress)
     }
 
     case _ =>

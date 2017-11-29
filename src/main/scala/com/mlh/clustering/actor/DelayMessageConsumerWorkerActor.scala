@@ -62,7 +62,7 @@ class DelayMessageConsumerWorkerActor
   def send(cnt: String) = {
     log.info("cnt = {}", cnt)
     if (cnt.split("_")(0) == "1")
-      (1 to 6) foreach{
+      (1 to 20) foreach{
         id =>
           CallApiHelper.getActorSelection(cnt.split("_")(0).toInt) ! cnt + " index_" + id
       }
