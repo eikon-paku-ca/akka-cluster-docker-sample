@@ -1,0 +1,1 @@
+docker logs -f akkaclusterdockersample_c1_1

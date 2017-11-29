@@ -2,7 +2,7 @@
 
 name := "clustering"
 
-organization := "com.mlh"
+organization := "jp.co.epaku"
 
 version := "0.3"
 
@@ -60,13 +60,13 @@ libraryDependencies ++= Seq (
 )
 
 
-maintainer := "Michael Hamrah <m@hamrah.com>"
+maintainer := "someone@abcde.fg"
 
 dockerExposedPorts in Docker := Seq(1600)
 
 dockerEntrypoint in Docker := Seq("sh", "-c", "CLUSTER_IP=`/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }'` bin/clustering $*")
 
-dockerRepository := Some("mhamrah")
+dockerRepository := Some("akkaclustertest")
 
 dockerBaseImage := "java"
 enablePlugins(JavaAppPackaging)
